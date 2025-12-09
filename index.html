@@ -240,25 +240,26 @@
         <div id="loginSection" class="login-section">
             <div class="form-group">
                 <label for="employeeName">Nom de l'employé</label>
-                <input type="text" id="employeeName" placeholder="Entrez votre nom" autocomplete="name">
-            </div>
-            <div class="form-group">
-                <label for="location">Localisation (optionnel)</label>
-                <select id="location">
+                <select id="employeeName">
                     <option value="">-- Sélectionner --</option>
-                    <option value="Rocgyms">Rocgyms</option>
-                    <option value="Montmorency">Montmorency</option>
-                    <option value="Autre">Autre</option>
+                    <option value="Hugo - Chef guide">Hugo - Chef guide</option>
+                    <option value="Grégoire - Guide">Grégoire - Guide</option>
+                    <option value="Jean-Baptiste - Guide">Jean-Baptiste - Guide</option>
+                    <option value="Louis-Alexandre - Guide">Louis-Alexandre - Guide</option>
+                    <option value="Raphaël - Directeur opérations">Raphaël - Directeur opérations</option>
+                    <option value="Simon - Guide">Simon - Guide</option>
+                    <option value="Alexandre - Guide">Alexandre - Guide</option>
                 </select>
             </div>
             <button class="btn-primary" onclick="login()">Se connecter</button>
             
             <div class="instructions">
                 <strong>Instructions:</strong><br>
-                • Connectez-vous une fois au début de votre quart<br>
+                • Sélectionnez votre nom<br>
+                • Autorisez la géolocalisation quand demandé<br>
                 • 6h-9h: Check-out (sortie)<br>
                 • 15h-20h: Check-in (retour)<br>
-                • Les scans NFC sont automatiques après connexion
+                • Votre position GPS sera enregistrée à chaque scan
             </div>
         </div>
 
@@ -287,8 +288,8 @@
     </div>
 
     <script>
-        // Configuration - REMPLACER PAR TON URL GOOGLE APPS SCRIPT
-        const SCRIPT_URL = https://script.google.com/macros/s/AKfycbw1r-qp0iU06KQNKQi5xPEJbbzPPlb8BJ6I9bkydnpQ0iPRfpQpcReX2XaT1EDL9Bo3WA/exec;
+        // Configuration - URL Google Apps Script configurée
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1r-qp0iU06KQNKQi5xPEJbbzPPlb8BJ6I9bkydnpQ0iPRfpQpcReX2XaT1EDL9Bo3WA/exec';
         
         let currentEmployee = null;
         let currentLocation = null;
@@ -302,14 +303,13 @@
         // Charger la session si elle existe
         window.addEventListener('load', () => {
             const savedEmployee = localStorage.getItem('employeeName');
-            const savedLocation = localStorage.getItem('location');
             const savedScans = localStorage.getItem('recentScans');
             
             if (savedEmployee) {
                 currentEmployee = savedEmployee;
-                currentLocation = savedLocation || '';
+                currentLocation = '';
                 document.getElementById('currentUser').textContent = currentEmployee;
-                document.getElementById('currentLocation').textContent = currentLocation ? `📍 ${currentLocation}` : '';
+                document.getElementById('currentLocation').textContent = '📍 Géolocalisation activée';
                 showSection('scan');
                 
                 if (savedScans) {
@@ -320,22 +320,20 @@
         });
 
         function login() {
-            const name = document.getElementById('employeeName').value.trim();
-            const location = document.getElementById('location').value;
+            const name = document.getElementById('employeeName').value;
             
             if (!name) {
-                alert('Veuillez entrer votre nom');
+                alert('Veuillez sélectionner votre nom');
                 return;
             }
             
             currentEmployee = name;
-            currentLocation = location;
+            currentLocation = '';
             
             localStorage.setItem('employeeName', name);
-            localStorage.setItem('location', location);
             
             document.getElementById('currentUser').textContent = name;
-            document.getElementById('currentLocation').textContent = location ? `📍 ${location}` : '';
+            document.getElementById('currentLocation').textContent = '📍 Géolocalisation activée';
             
             showSection('scan');
         }
@@ -345,9 +343,7 @@
                 currentEmployee = null;
                 currentLocation = null;
                 localStorage.removeItem('employeeName');
-                localStorage.removeItem('location');
                 document.getElementById('employeeName').value = '';
-                document.getElementById('location').value = '';
                 showSection('login');
             }
         }
@@ -404,12 +400,38 @@
                 scanType = 'Scan hors plage horaire';
             }
 
+            showStatus('📍 Obtention de la géolocalisation...', 'info');
+
+            // Obtenir la géolocalisation
+            let latitude = null;
+            let longitude = null;
+            let geoError = null;
+
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    });
+                });
+                
+                latitude = position.coords.latitude;
+                longitude = position.coords.longitude;
+            } catch (error) {
+                console.error('Erreur géolocalisation:', error);
+                geoError = error.message;
+                // Continue quand même le scan même si la géolocalisation échoue
+            }
+
             const scanData = {
                 timestamp: now.toISOString(),
                 employee: currentEmployee,
                 tagId: tagId,
                 scanType: scanType,
-                location: currentLocation || ''
+                latitude: latitude,
+                longitude: longitude,
+                geoError: geoError
             };
 
             showStatus('⏳ Envoi des données...', 'info');
@@ -425,7 +447,8 @@
                 });
 
                 // no-cors ne permet pas de lire la réponse, on assume le succès
-                showStatus(`✅ ${scanType} enregistré!\nTag: ${tagId}`, 'success');
+                const locationInfo = latitude ? `📍 ${latitude.toFixed(6)}, ${longitude.toFixed(6)}` : '⚠️ Géoloc non disponible';
+                showStatus(`✅ ${scanType} enregistré!\nTag: ${tagId}\n${locationInfo}`, 'success');
                 
                 // Ajouter aux scans récents
                 recentScans.unshift({
