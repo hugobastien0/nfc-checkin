@@ -182,6 +182,17 @@
             background: #fee2e2;
         }
 
+        .kit-item.mine {
+            background: #d1fae5;
+            border-color: #10b981;
+            border-width: 3px;
+        }
+
+        .kit-item.mine:hover {
+            border-color: #059669;
+            background: #a7f3d0;
+        }
+
         .kit-item input[type="checkbox"] {
             width: 24px;
             height: 24px;
@@ -208,6 +219,17 @@
         .unavailable-badge {
             display: inline-block;
             background: #ef4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 8px;
+            font-weight: 700;
+        }
+
+        .mine-badge {
+            display: inline-block;
+            background: #10b981;
             color: white;
             padding: 2px 8px;
             border-radius: 4px;
@@ -439,10 +461,10 @@
 
                 <div class="info-box">
                     <strong>ℹ️ Info:</strong><br>
-                    • 🔴 = Équipement déjà sorti<br>
+                    • 🔴 = Équipement sorti par un autre guide<br>
+                    • ✅ = TES items sortis (tu peux les Check-in)<br>
                     • Trousses et kit burritos: premier arrivé, premier servi<br>
-                    • Expérience client: seulement pour activités glace<br>
-                    • Les kits sont organisés par catégorie
+                    • Expérience client: seulement pour activités glace
                 </div>
             </div>
         </div>
@@ -725,12 +747,20 @@
                 const kits = sections[sectionName];
                 kits.forEach((kit, index) => {
                     const uniqueId = `kit_${kitIndex}_${index}`;
-                    const isUnavailable = equipmentState[kit.name] && equipmentState[kit.name].status === 'Occupé';
+                    const equipmentInfo = equipmentState[kit.name];
+                    const isUnavailable = equipmentInfo && 
+                                        equipmentInfo.status === 'Occupé' && 
+                                        equipmentInfo.employee !== selectedEmployee;
+                    const isMine = equipmentInfo && 
+                                  equipmentInfo.status === 'Occupé' && 
+                                  equipmentInfo.employee === selectedEmployee;
 
                     const kitDiv = document.createElement('div');
                     kitDiv.className = 'kit-item';
                     if (isUnavailable) {
                         kitDiv.className += ' unavailable';
+                    } else if (isMine) {
+                        kitDiv.className += ' mine';
                     }
                     
                     if (!isUnavailable) {
@@ -755,8 +785,13 @@
                         
                         const info = document.createElement('div');
                         info.className = 'unavailable-info';
-                        info.textContent = `Par ${equipmentState[kit.name].employee} - ${equipmentState[kit.name].activity}`;
+                        info.textContent = `Par ${equipmentInfo.employee} - ${equipmentInfo.activity}`;
                         label.appendChild(info);
+                    } else if (isMine) {
+                        const badge = document.createElement('span');
+                        badge.className = 'mine-badge';
+                        badge.textContent = '✅ À MOI';
+                        label.appendChild(badge);
                     }
 
                     kitDiv.appendChild(checkbox);
