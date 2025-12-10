@@ -2,15 +2,17 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#2563eb">
-    <title>Scan NFC - Équipement</title>
-    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Scan Équipement - Roc Gym</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -20,39 +22,49 @@
             display: flex;
             flex-direction: column;
             color: #fff;
+            padding: 15px;
         }
 
         .container {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
             width: 100%;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .header h1 {
             font-size: 28px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .header p {
-            font-size: 14px;
+            font-size: 15px;
             opacity: 0.9;
         }
 
-        .login-section, .scan-section {
-            background: rgba(255, 255, 255, 0.1);
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            color: #333;
+            margin-bottom: 15px;
         }
 
         .form-group {
@@ -61,171 +73,285 @@
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
+            color: #555;
         }
 
-        input, select {
+        select, input[type="number"] {
             width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
             font-size: 16px;
-            background: rgba(255, 255, 255, 0.9);
+            background: white;
             color: #333;
         }
 
-        button {
+        select:focus, input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-back {
             width: 100%;
             padding: 15px;
-            border: none;
-            border-radius: 10px;
+            border: 2px solid #2563eb;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
+            cursor: pointer;
+            background: white;
+            color: #2563eb;
+            margin-top: 10px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 17px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .kits-section {
+            margin-bottom: 20px;
+        }
+
+        .kit-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .kit-item:hover {
+            border-color: #2563eb;
+            background: #f8fafc;
+        }
+
+        .kit-item.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .kit-item.unavailable {
+            opacity: 0.5;
+            background: #fee2e2;
+            border-color: #ef4444;
+            cursor: not-allowed;
+        }
+
+        .kit-item.unavailable:hover {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .kit-item input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .kit-item.unavailable input[type="checkbox"] {
+            cursor: not-allowed;
+        }
+
+        .kit-item label {
+            margin: 0;
+            flex: 1;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .kit-item.unavailable label {
+            cursor: not-allowed;
+        }
+
+        .unavailable-badge {
+            display: inline-block;
+            background: #ef4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 8px;
+            font-weight: 700;
+        }
+
+        .unavailable-info {
+            font-size: 12px;
+            color: #991b1b;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .quantity-input {
+            width: 80px;
+            padding: 8px;
+            margin-left: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
         }
 
-        .btn-primary {
-            background: #2563eb;
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-checkout {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
 
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-
-        .btn-scan {
-            background: #10b981;
+        .btn-checkin {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            font-size: 20px;
-            padding: 25px;
-            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
         }
 
-        .btn-scan:hover {
-            background: #059669;
-        }
-
-        .btn-scan:disabled {
-            background: #6b7280;
+        button:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .btn-logout {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            margin-top: 15px;
-            padding: 10px;
-            font-size: 14px;
-        }
-
-        .user-info {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .user-info strong {
-            font-size: 18px;
-        }
-
         .status {
-            margin-top: 20px;
+            margin-top: 15px;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 12px;
             text-align: center;
             font-weight: 600;
-        }
-
-        .status.success {
-            background: rgba(16, 185, 129, 0.3);
-        }
-
-        .status.error {
-            background: rgba(239, 68, 68, 0.3);
-        }
-
-        .status.info {
-            background: rgba(59, 130, 246, 0.3);
-        }
-
-        .hidden {
             display: none;
         }
 
-        .scan-animation {
-            width: 120px;
-            height: 120px;
-            margin: 20px auto;
-            position: relative;
+        .status.show {
+            display: block;
+            animation: slideIn 0.3s ease;
         }
 
-        .scan-animation::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
         }
 
-        .scan-animation::after {
-            content: '📱';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 60px;
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
                 opacity: 1;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 0.5;
+                transform: translateY(0);
             }
         }
 
-        .instructions {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .recent-scans {
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .recent-scans h3 {
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-
-        .scan-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            margin-bottom: 8px;
+        .info-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
             border-radius: 8px;
             font-size: 13px;
+            line-height: 1.5;
         }
 
-        .scan-item .time {
-            opacity: 0.8;
-            font-size: 12px;
+        .link-box {
+            margin-top: 10px;
+            padding: 15px;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+        }
+
+        .link-box a {
+            color: #d97706;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s;
+        }
+
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #2563eb;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -233,176 +359,498 @@
     <div class="container">
         <div class="header">
             <h1>🏔️ Scan Équipement</h1>
-            <p>Rocgyms / Aventurex</p>
+            <p>Roc Gym / Aventurex</p>
         </div>
 
-        <!-- Section de connexion -->
-        <div id="loginSection" class="login-section">
-            <div class="form-group">
-                <label for="employeeName">Nom de l'employé</label>
-                <select id="employeeName">
-                    <option value="">-- Sélectionner --</option>
-                    <option value="Hugo - Chef guide">Hugo - Chef guide</option>
-                    <option value="Grégoire - Guide">Grégoire - Guide</option>
-                    <option value="Jean-Baptiste - Guide">Jean-Baptiste - Guide</option>
-                    <option value="Louis-Alexandre - Guide">Louis-Alexandre - Guide</option>
-                    <option value="Raphaël - Directeur opérations">Raphaël - Directeur opérations</option>
-                    <option value="Simon - Guide">Simon - Guide</option>
-                    <option value="Alexandre - Guide">Alexandre - Guide</option>
-                </select>
-            </div>
-            <button class="btn-primary" onclick="login()">Se connecter</button>
-            
-            <div class="instructions">
-                <strong>Instructions:</strong><br>
-                • Sélectionnez votre nom<br>
-                • Autorisez la géolocalisation quand demandé<br>
-                • 6h-9h: Check-out (sortie)<br>
-                • 15h-20h: Check-in (retour)<br>
-                • Votre position GPS sera enregistrée à chaque scan
+        <!-- PAGE 1: Sélection nom et activité -->
+        <div id="page1" class="page active">
+            <div class="card">
+                <div class="form-group">
+                    <label for="employeeName">👤 Ton nom</label>
+                    <select id="employeeName">
+                        <option value="">-- Sélectionner --</option>
+                        <option value="Hugo - Chef guide">Hugo - Chef guide</option>
+                        <option value="Grégoire - Guide">Grégoire - Guide</option>
+                        <option value="Jean-Baptiste - Guide">Jean-Baptiste - Guide</option>
+                        <option value="Louis-Alexandre - Guide">Louis-Alexandre - Guide</option>
+                        <option value="Raphaël - Directeur opérations">Raphaël - Directeur opérations</option>
+                        <option value="Simon - Guide">Simon - Guide</option>
+                        <option value="Alexandre - Guide">Alexandre - Guide</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="activity">🏔️ Activité guidée</label>
+                    <select id="activity">
+                        <option value="">-- Sélectionner --</option>
+                        <option value="Initiation glace">Initiation glace</option>
+                        <option value="Initiation roche">Initiation roche</option>
+                        <option value="Autonomie moulinette glace">Autonomie moulinette glace</option>
+                        <option value="Autonomie moulinette roche">Autonomie moulinette roche</option>
+                        <option value="Premier de cordée glace">Premier de cordée glace</option>
+                        <option value="Premier de cordée roche">Premier de cordée roche</option>
+                        <option value="Via ferrata hivernale">Via ferrata hivernale</option>
+                        <option value="Via ferrata estivale">Via ferrata estivale</option>
+                    </select>
+                </div>
+
+                <button class="btn-primary" onclick="goToPage2()">Suivant ➡️</button>
+
+                <div class="info-box">
+                    <strong>ℹ️ Info:</strong><br>
+                    Sélectionne ton nom et l'activité que tu vas guider.<br>
+                    L'équipement disponible s'affichera automatiquement.
+                </div>
             </div>
         </div>
 
-        <!-- Section de scan -->
-        <div id="scanSection" class="scan-section hidden">
-            <div class="user-info">
-                <strong id="currentUser"></strong><br>
-                <span id="currentLocation"></span>
-            </div>
+        <!-- PAGE 2: Sélection des kits par sections -->
+        <div id="page2" class="page">
+            <div class="card">
+                <h3 id="activityTitle" style="margin-bottom: 20px; color: #2563eb;"></h3>
 
-            <div class="scan-animation"></div>
+                <!-- Lien réservation bottes (pour initiation glace) -->
+                <div id="bootLink" class="link-box hidden">
+                    <strong>🥾 Réservation bottes de glace:</strong><br>
+                    <a href="https://endorphine.ca" target="_blank">👉 Système Endorphine.ca</a><br>
+                    <small>Vérifie les réservations avant de partir!</small>
+                </div>
 
-            <button class="btn-scan" id="scanBtn" onclick="startNFCScan()">
-                📱 Scanner un tag NFC
-            </button>
+                <!-- Loading indicator -->
+                <div id="loadingIndicator" class="loading">
+                    ⏳ Vérification de la disponibilité...
+                </div>
 
-            <button class="btn-logout" onclick="logout()">Se déconnecter</button>
+                <!-- Les sections s'afficheront ici dynamiquement -->
+                <div id="kitsContainer" class="hidden"></div>
 
-            <div id="statusMessage" class="status hidden"></div>
+                <div class="button-group hidden" id="actionButtons">
+                    <button class="btn-checkout" onclick="handleScan('checkout')">
+                        📤 Check-out
+                    </button>
+                    <button class="btn-checkin" onclick="handleScan('checkin')">
+                        📥 Check-in
+                    </button>
+                </div>
 
-            <div class="recent-scans" id="recentScans">
-                <h3>Derniers scans</h3>
-                <div id="scansList"></div>
+                <button class="btn-back" onclick="goToPage1()">⬅️ Retour</button>
+
+                <div id="statusMessage" class="status"></div>
+
+                <div class="info-box">
+                    <strong>ℹ️ Info:</strong><br>
+                    • 🔴 = Équipement déjà sorti<br>
+                    • Trousses et kit burritos: premier arrivé, premier servi<br>
+                    • Expérience client: seulement pour activités glace<br>
+                    • Les kits sont organisés par catégorie
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuration - URL Google Apps Script configurée
+        // Configuration
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1r-qp0iU06KQNKQi5xPEJbbzPPlb8BJ6I9bkydnpQ0iPRfpQpcReX2XaT1EDL9Bo3WA/exec';
         
-        let currentEmployee = null;
-        let currentLocation = null;
-        let recentScans = [];
+        let selectedEmployee = '';
+        let selectedActivity = '';
+        let equipmentState = {};
 
-        // Vérifier si le navigateur supporte NFC
-        if (!('NDEFReader' in window)) {
-            alert('⚠️ Votre navigateur ne supporte pas NFC. Utilisez Chrome sur Android ou Safari sur iPhone avec le Shortcut iOS.');
-        }
-
-        // Charger la session si elle existe
-        window.addEventListener('load', () => {
-            const savedEmployee = localStorage.getItem('employeeName');
-            const savedScans = localStorage.getItem('recentScans');
-            
-            if (savedEmployee) {
-                currentEmployee = savedEmployee;
-                currentLocation = '';
-                document.getElementById('currentUser').textContent = currentEmployee;
-                document.getElementById('currentLocation').textContent = '📍 Géolocalisation activée';
-                showSection('scan');
-                
-                if (savedScans) {
-                    recentScans = JSON.parse(savedScans);
-                    displayRecentScans();
-                }
+        // Configuration des kits par activité organisés en sections
+        const activityKits = {
+            "Initiation glace": {
+                "🏥 Premiers soins": [
+                    { name: "Trousse de premiers soins #1", type: "fixed" },
+                    { name: "Trousse de premiers soins #2", type: "fixed" },
+                    { name: "Trousse de premiers soins #3", type: "fixed" },
+                    { name: "Kit burrito #1", type: "fixed" },
+                    { name: "Kit burrito #2", type: "fixed" },
+                    { name: "Kit burrito #3", type: "fixed" }
+                ],
+                "🎒 Matériel": [
+                    { name: "6 cordes dry", type: "fixed" },
+                    { name: "6 kit relais", type: "fixed" },
+                    { name: "Kit guide glace #1", type: "fixed" },
+                    { name: "Kit guide glace #2", type: "fixed" },
+                    { name: "Sac simond jaune", type: "fixed" },
+                    { name: "Crampons", type: "quantity", default: 2, label: "Nombre de clients +2" },
+                    { name: "Piolets", type: "quantity", default: 2, label: "Nombre de cordées" },
+                    { name: "Lunettes sécurité (5 paires)", type: "fixed" },
+                    { name: "7 dégaines alpines", type: "fixed" },
+                    { name: "Kit ATC guide", type: "fixed" },
+                    { name: "Kit ATC clients", type: "fixed" },
+                    { name: "Tote bags", type: "quantity", default: 6, label: "Protection cordes" }
+                ],
+                "✨ Expérience client": [
+                    { name: "Tente de pêche", type: "fixed" },
+                    { name: "Table de cuisine", type: "fixed" },
+                    { name: "Brûleur dragon fly", type: "fixed" }
+                ]
+            },
+            "Initiation roche": {
+                "🏥 Premiers soins": [
+                    { name: "Trousse de premiers soins #1", type: "fixed" },
+                    { name: "Trousse de premiers soins #2", type: "fixed" },
+                    { name: "Trousse de premiers soins #3", type: "fixed" },
+                    { name: "Kit burrito #1", type: "fixed" },
+                    { name: "Kit burrito #2", type: "fixed" },
+                    { name: "Kit burrito #3", type: "fixed" }
+                ],
+                "🎒 Matériel": [
+                    { name: "3 cordes rocher (à venir)", type: "fixed" },
+                    { name: "3 kit relais", type: "fixed" },
+                    { name: "Kit via ferrata guide #1", type: "fixed" },
+                    { name: "3 tarp (à venir)", type: "fixed" }
+                ]
+            },
+            "Autonomie moulinette glace": {
+                "🏥 Premiers soins": [
+                    { name: "Trousse de premiers soins #1", type: "fixed" },
+                    { name: "Trousse de premiers soins #2", type: "fixed" },
+                    { name: "Trousse de premiers soins #3", type: "fixed" },
+                    { name: "Kit burrito #1", type: "fixed" },
+                    { name: "Kit burrito #2", type: "fixed" },
+                    { name: "Kit burrito #3", type: "fixed" }
+                ],
+                "🎒 Matériel": [
+                    { name: "3 cordes dry", type: "fixed" },
+                    { name: "Kit relais X", type: "fixed" },
+                    { name: "Kit relais Y", type: "fixed" },
+                    { name: "Kit relais W", type: "fixed" },
+                    { name: "Kit relais V", type: "fixed" },
+                    { name: "Kit guide glace #3", type: "fixed" },
+                    { name: "Tote bags", type: "quantity", default: 3, label: "Protection cordes" },
+                    { name: "6 crampons", type: "fixed" },
+                    { name: "2 paires de piolets", type: "fixed" }
+                ],
+                "✨ Expérience client": [
+                    { name: "Tente de pêche", type: "fixed" },
+                    { name: "Table de cuisine", type: "fixed" },
+                    { name: "Brûleur dragon fly", type: "fixed" }
+                ]
+            },
+            "Autonomie moulinette roche": {
+                "🏥 Premiers soins": [
+                    { name: "Trousse de premiers soins #1", type: "fixed" },
+                    { name: "Trousse de premiers soins #2", type: "fixed" },
+                    { name: "Trousse de premiers soins #3", type: "fixed" },
+                    { name: "Kit burrito #1", type: "fixed" },
+                    { name: "Kit burrito #2", type: "fixed" },
+                    { name: "Kit burrito #3", type: "fixed" }
+                ],
+                "🎒 Matériel": [
+                    { name: "3 cordes rocher (à venir)", type: "fixed" },
+                    { name: "Kit relais X", type: "fixed" },
+                    { name: "Kit relais Y", type: "fixed" },
+                    { name: "Kit relais W", type: "fixed" },
+                    { name: "Kit relais V", type: "fixed" },
+                    { name: "Kit guide glace #3", type: "fixed" },
+                    { name: "3 tarp (à venir)", type: "fixed" }
+                ]
+            },
+            "Premier de cordée glace": {
+                "🏥 Premiers soins": [
+                    { name: "Trousse de premiers soins #1", type: "fixed" },
+                    { name: "Trousse de premiers soins #2", type: "fixed" },
+                    { name: "Trousse de premiers soins #3", type: "fixed" },
+                    { name: "Kit burrito #1", type: "fixed" },
+                    { name: "Kit burrito #2", type: "fixed" },
+                    { name: "Kit burrito #3", type: "fixed" }
+                ],
+                "🎒 Matériel": [
+                    { name: "1 corde dry simple", type: "fixed" },
+                    { name: "2 cordes demie", type: "fixed" },
+                    { name: "Kit relais X", type: "fixed" },
+                    { name: "Kit relais Y", type: "fixed" },
+                    { name: "Kit relais W", type: "fixed" },
+                    { name: "Kit relais V", type: "fixed" },
+                    { name: "Kit guide glace #3", type: "fixed" },
+                    { name: "Tote bags", type: "quantity", default: 2, label: "Protection cordes" },
+                    { name: "4 crampons", type: "fixed" },
+                    { name: "2 paires de piolets", type: "fixed" }
+                ],
+                "✨ Expérience client": [
+                    { name: "Tente de pêche", type: "fixed" },
+                    { name: "Table de cuisine", type: "fixed" },
+                    { name: "Brûleur dragon fly", type: "fixed" }
+                ]
+            },
+            "Premier de cordée roche": {
+                "🏥 Premiers soins": [
+                    { name: "Trousse de premiers soins #1", type: "fixed" },
+                    { name: "Trousse de premiers soins #2", type: "fixed" },
+                    { name: "Trousse de premiers soins #3", type: "fixed" },
+                    { name: "Kit burrito #1", type: "fixed" },
+                    { name: "Kit burrito #2", type: "fixed" },
+                    { name: "Kit burrito #3", type: "fixed" }
+                ],
+                "🎒 Matériel": [
+                    { name: "2 cordes rocher (à venir)", type: "fixed" },
+                    { name: "Kit relais X", type: "fixed" },
+                    { name: "Kit relais Y", type: "fixed" },
+                    { name: "Kit relais W", type: "fixed" },
+                    { name: "Kit relais V", type: "fixed" },
+                    { name: "Kit guide glace #3", type: "fixed" },
+                    { name: "2 tarp (à venir)", type: "fixed" }
+                ]
+            },
+            "Via ferrata hivernale": {
+                "🏥 Premiers soins": [
+                    { name: "Trousse de premiers soins #1", type: "fixed" },
+                    { name: "Trousse de premiers soins #2", type: "fixed" },
+                    { name: "Trousse de premiers soins #3", type: "fixed" },
+                    { name: "Kit burrito #1", type: "fixed" },
+                    { name: "Kit burrito #2", type: "fixed" },
+                    { name: "Kit burrito #3", type: "fixed" }
+                ],
+                "🎒 Matériel": [
+                    { name: "Piolet alpin Guide (mountaineering)", type: "fixed" },
+                    { name: "Kit via ferrata guide #1", type: "fixed" },
+                    { name: "17 harnais", type: "fixed" },
+                    { name: "17 longes", type: "fixed" },
+                    { name: "17 descendeurs en 8", type: "fixed" },
+                    { name: "17 prussik", type: "fixed" }
+                ]
+            },
+            "Via ferrata estivale": {
+                "🏥 Premiers soins": [
+                    { name: "Trousse de premiers soins #1", type: "fixed" },
+                    { name: "Trousse de premiers soins #2", type: "fixed" },
+                    { name: "Trousse de premiers soins #3", type: "fixed" },
+                    { name: "Kit burrito #1", type: "fixed" },
+                    { name: "Kit burrito #2", type: "fixed" },
+                    { name: "Kit burrito #3", type: "fixed" }
+                ],
+                "🎒 Matériel": [
+                    { name: "Kit via ferrata guide #1", type: "fixed" },
+                    { name: "17 harnais", type: "fixed" },
+                    { name: "17 longes", type: "fixed" },
+                    { name: "17 descendeurs en 8", type: "fixed" },
+                    { name: "17 prussik", type: "fixed" }
+                ]
             }
-        });
+        };
 
-        function login() {
-            const name = document.getElementById('employeeName').value;
-            
-            if (!name) {
-                alert('Veuillez sélectionner votre nom');
+        async function goToPage2() {
+            selectedEmployee = document.getElementById('employeeName').value;
+            selectedActivity = document.getElementById('activity').value;
+
+            if (!selectedEmployee) {
+                alert('⚠️ Sélectionne ton nom');
                 return;
             }
-            
-            currentEmployee = name;
-            currentLocation = '';
-            
-            localStorage.setItem('employeeName', name);
-            
-            document.getElementById('currentUser').textContent = name;
-            document.getElementById('currentLocation').textContent = '📍 Géolocalisation activée';
-            
-            showSection('scan');
-        }
 
-        function logout() {
-            if (confirm('Voulez-vous vraiment vous déconnecter?')) {
-                currentEmployee = null;
-                currentLocation = null;
-                localStorage.removeItem('employeeName');
-                document.getElementById('employeeName').value = '';
-                showSection('login');
+            if (!selectedActivity) {
+                alert('⚠️ Sélectionne l\'activité guidée');
+                return;
             }
-        }
 
-        function showSection(section) {
-            if (section === 'login') {
-                document.getElementById('loginSection').classList.remove('hidden');
-                document.getElementById('scanSection').classList.add('hidden');
+            // Afficher la page 2
+            document.getElementById('page1').classList.remove('active');
+            document.getElementById('page2').classList.add('active');
+
+            // Mettre à jour le titre
+            document.getElementById('activityTitle').textContent = `📋 ${selectedActivity}`;
+
+            // Afficher le lien bottes pour activités glace
+            if (selectedActivity.includes("glace")) {
+                document.getElementById('bootLink').classList.remove('hidden');
             } else {
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('scanSection').classList.remove('hidden');
+                document.getElementById('bootLink').classList.add('hidden');
+            }
+
+            // Charger l'état de l'équipement
+            await loadEquipmentState();
+
+            // Générer les kits
+            generateKits();
+        }
+
+        function goToPage1() {
+            document.getElementById('page2').classList.remove('active');
+            document.getElementById('page1').classList.add('active');
+        }
+
+        async function loadEquipmentState() {
+            try {
+                showStatus('⏳ Vérification de la disponibilité...', 'info');
+                
+                const response = await fetch(`${SCRIPT_URL}?action=check_availability`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    equipmentState = data.equipment || {};
+                    console.log('État équipement chargé:', equipmentState);
+                } else {
+                    console.error('Erreur chargement état:', data.message);
+                    equipmentState = {};
+                }
+            } catch (error) {
+                console.error('Erreur fetch état:', error);
+                equipmentState = {};
             }
         }
 
-        async function startNFCScan() {
-            if (!currentEmployee) {
-                showStatus('Erreur: Vous devez être connecté', 'error');
-                return;
-            }
+        function generateKits() {
+            const container = document.getElementById('kitsContainer');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const actionButtons = document.getElementById('actionButtons');
+            
+            container.innerHTML = '';
+            loadingIndicator.classList.add('hidden');
+            container.classList.remove('hidden');
+            actionButtons.classList.remove('hidden');
 
-            try {
-                const ndef = new NDEFReader();
-                const scanBtn = document.getElementById('scanBtn');
-                
-                scanBtn.disabled = true;
-                scanBtn.textContent = '📱 Approchez le tag NFC...';
-                showStatus('En attente du scan NFC...', 'info');
+            const sections = activityKits[selectedActivity] || {};
+            let kitIndex = 0;
 
-                await ndef.scan();
-                
-                ndef.addEventListener('reading', ({ serialNumber }) => {
-                    handleNFCScan(serialNumber);
+            Object.keys(sections).forEach(sectionName => {
+                // Créer le header de section
+                const sectionHeader = document.createElement('div');
+                sectionHeader.className = 'section-header';
+                sectionHeader.innerHTML = `
+                    <span class="section-title">${sectionName}</span>
+                    <span class="toggle-icon" id="icon_${kitIndex}">▼</span>
+                `;
+                const sectionId = `section_${kitIndex}`;
+                sectionHeader.onclick = () => toggleSection(sectionId);
+                container.appendChild(sectionHeader);
+
+                // Créer le conteneur de kits
+                const kitsSection = document.createElement('div');
+                kitsSection.className = 'kits-section';
+                kitsSection.id = sectionId;
+                kitsSection.style.display = 'block';
+
+                const kits = sections[sectionName];
+                kits.forEach((kit, index) => {
+                    const uniqueId = `kit_${kitIndex}_${index}`;
+                    const isUnavailable = equipmentState[kit.name] && equipmentState[kit.name].status === 'Occupé';
+
+                    const kitDiv = document.createElement('div');
+                    kitDiv.className = 'kit-item';
+                    if (isUnavailable) {
+                        kitDiv.className += ' unavailable';
+                    }
+                    
+                    if (!isUnavailable) {
+                        kitDiv.onclick = () => toggleKit(uniqueId);
+                    }
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = uniqueId;
+                    checkbox.value = kit.name;
+                    checkbox.disabled = isUnavailable;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = uniqueId;
+                    label.innerHTML = kit.name;
+                    
+                    if (isUnavailable) {
+                        const badge = document.createElement('span');
+                        badge.className = 'unavailable-badge';
+                        badge.textContent = '🔴 SORTI';
+                        label.appendChild(badge);
+                        
+                        const info = document.createElement('div');
+                        info.className = 'unavailable-info';
+                        info.textContent = `Par ${equipmentState[kit.name].employee} - ${equipmentState[kit.name].activity}`;
+                        label.appendChild(info);
+                    }
+
+                    kitDiv.appendChild(checkbox);
+                    kitDiv.appendChild(label);
+
+                    // Si c'est un item avec quantité variable
+                    if (kit.type === 'quantity' && !isUnavailable) {
+                        const input = document.createElement('input');
+                        input.type = 'number';
+                        input.className = 'quantity-input';
+                        input.id = `qty_${uniqueId}`;
+                        input.value = kit.default || 1;
+                        input.min = 0;
+                        input.onclick = (e) => e.stopPropagation();
+                        kitDiv.appendChild(input);
+                    }
+
+                    kitsSection.appendChild(kitDiv);
                 });
 
-            } catch (error) {
-                console.error('Erreur NFC:', error);
-                showStatus(`Erreur NFC: ${error.message}`, 'error');
-                document.getElementById('scanBtn').disabled = false;
-                document.getElementById('scanBtn').textContent = '📱 Scanner un tag NFC';
+                container.appendChild(kitsSection);
+                kitIndex++;
+            });
+        }
+
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const icon = document.getElementById(`icon_${sectionId.split('_')[1]}`);
+            
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                icon.classList.remove('rotated');
+            } else {
+                section.style.display = 'none';
+                icon.classList.add('rotated');
             }
         }
 
-        async function handleNFCScan(tagId) {
-            const now = new Date();
-            const hour = now.getHours();
+        function toggleKit(kitId) {
+            const checkbox = document.getElementById(kitId);
+            if (checkbox.disabled) return;
             
-            // Déterminer le type de scan basé sur l'heure
-            let scanType;
-            if (hour >= 6 && hour < 9) {
-                scanType = 'Check-out';
-            } else if (hour >= 15 && hour < 20) {
-                scanType = 'Check-in';
+            const kitItem = checkbox.parentElement;
+            
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                kitItem.classList.add('selected');
             } else {
-                scanType = 'Scan hors plage horaire';
+                kitItem.classList.remove('selected');
             }
+        }
+
+        async function handleScan(type) {
+            // Récupérer tous les kits sélectionnés
+            const selectedKits = [];
+            const sections = activityKits[selectedActivity] || {};
+            
+            Object.keys(sections).forEach(sectionName => {
+                const kits = sections[sectionName];
+                kits.forEach((kit, index) => {
+                    const checkboxes = document.querySelectorAll(`input[type="checkbox"][value="${kit.name}"]`);
+                    checkboxes.forEach(checkbox => {
+                        if (checkbox.checked) {
+                            let kitName = kit.name;
+                            
+                            // Ajouter la quantité si c'est un item variable
+                            if (kit.type === 'quantity') {
+                                const qtyInput = document.getElementById(`qty_${checkbox.id}`);
+                                if (qtyInput) {
+                                    const qty = qtyInput.value;
+                                    kitName += ` (${qty})`;
+                                }
+                            }
+                            
+                            selectedKits.push(kitName);
+                        }
+                    });
+                });
+            });
+
+            // Validation
+            if (selectedKits.length === 0) {
+                showStatus('⚠️ Sélectionne au moins un kit disponible', 'error');
+                return;
+            }
+
+            // Désactiver les boutons
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => btn.disabled = true);
 
             showStatus('📍 Obtention de la géolocalisation...', 'info');
 
-            // Obtenir la géolocalisation
+            // Géolocalisation
             let latitude = null;
             let longitude = null;
             let geoError = null;
@@ -421,84 +869,72 @@
             } catch (error) {
                 console.error('Erreur géolocalisation:', error);
                 geoError = error.message;
-                // Continue quand même le scan même si la géolocalisation échoue
             }
 
-            const scanData = {
-                timestamp: now.toISOString(),
-                employee: currentEmployee,
-                tagId: tagId,
-                scanType: scanType,
-                latitude: latitude,
-                longitude: longitude,
-                geoError: geoError
-            };
+            const scanType = type === 'checkout' ? 'Check-out' : 'Check-in';
+            const now = new Date();
 
-            showStatus('⏳ Envoi des données...', 'info');
+            // Créer une entrée pour chaque kit sélectionné
+            const promises = selectedKits.map(async (kit) => {
+                const scanData = {
+                    timestamp: now.toISOString(),
+                    employee: selectedEmployee,
+                    activity: selectedActivity,
+                    tagId: kit,
+                    scanType: scanType,
+                    latitude: latitude,
+                    longitude: longitude,
+                    geoError: geoError
+                };
+
+                showStatus(`⏳ Envoi: ${kit}...`, 'info');
+
+                try {
+                    await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(scanData)
+                    });
+                    return kit;
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    throw error;
+                }
+            });
 
             try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(scanData)
-                });
-
-                // no-cors ne permet pas de lire la réponse, on assume le succès
-                const locationInfo = latitude ? `📍 ${latitude.toFixed(6)}, ${longitude.toFixed(6)}` : '⚠️ Géoloc non disponible';
-                showStatus(`✅ ${scanType} enregistré!\nTag: ${tagId}\n${locationInfo}`, 'success');
+                await Promise.all(promises);
                 
-                // Ajouter aux scans récents
-                recentScans.unshift({
-                    ...scanData,
-                    displayTime: now.toLocaleTimeString('fr-CA')
-                });
-                recentScans = recentScans.slice(0, 5); // Garder seulement les 5 derniers
-                localStorage.setItem('recentScans', JSON.stringify(recentScans));
-                displayRecentScans();
-
-                // Réactiver le bouton après 2 secondes
-                setTimeout(() => {
-                    document.getElementById('scanBtn').disabled = false;
-                    document.getElementById('scanBtn').textContent = '📱 Scanner un tag NFC';
+                const locationInfo = latitude ? `📍 ${latitude.toFixed(6)}, ${longitude.toFixed(6)}` : '⚠️ Géoloc non disponible';
+                showStatus(`✅ ${scanType} enregistré!\nActivité: ${selectedActivity}\n${selectedKits.length} kit(s)\n${locationInfo}`, 'success');
+                
+                // Recharger l'état et régénérer les kits
+                setTimeout(async () => {
+                    await loadEquipmentState();
+                    generateKits();
+                    buttons.forEach(btn => btn.disabled = false);
                 }, 2000);
 
             } catch (error) {
                 console.error('Erreur:', error);
                 showStatus('❌ Erreur lors de l\'envoi', 'error');
-                document.getElementById('scanBtn').disabled = false;
-                document.getElementById('scanBtn').textContent = '📱 Scanner un tag NFC';
+                buttons.forEach(btn => btn.disabled = false);
             }
         }
 
         function showStatus(message, type) {
             const statusEl = document.getElementById('statusMessage');
             statusEl.textContent = message;
-            statusEl.className = `status ${type}`;
-            statusEl.classList.remove('hidden');
+            statusEl.className = `status ${type} show`;
             
             if (type === 'success') {
                 setTimeout(() => {
-                    statusEl.classList.add('hidden');
+                    statusEl.classList.remove('show');
                 }, 5000);
             }
-        }
-
-        function displayRecentScans() {
-            const scansList = document.getElementById('scansList');
-            if (recentScans.length === 0) {
-                scansList.innerHTML = '<div style="opacity: 0.6; text-align: center;">Aucun scan récent</div>';
-                return;
-            }
-
-            scansList.innerHTML = recentScans.map(scan => `
-                <div class="scan-item">
-                    <strong>${scan.scanType}</strong> - Tag: ${scan.tagId}<br>
-                    <span class="time">${scan.displayTime}</span>
-                </div>
-            `).join('');
         }
     </script>
 </body>
