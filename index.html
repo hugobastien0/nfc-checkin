@@ -79,7 +79,7 @@
             color: #555;
         }
 
-        select, input[type="number"] {
+        select, input[type="number"], input[type="password"] {
             width: 100%;
             padding: 15px;
             border: 2px solid #e5e7eb;
@@ -93,6 +93,12 @@
             outline: none;
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        input[type="password"] {
+            font-size: 24px;
+            letter-spacing: 8px;
+            text-align: center;
         }
 
         .btn-primary {
@@ -389,7 +395,7 @@
             <div class="card">
                 <div class="form-group">
                     <label for="employeeName">👤 Ton nom</label>
-                    <select id="employeeName">
+                    <select id="employeeName" onchange="showPinField()">
                         <option value="">-- Sélectionner --</option>
                         <option value="Hugo - Chef guide">Hugo - Chef guide</option>
                         <option value="Grégoire - Guide">Grégoire - Guide</option>
@@ -399,6 +405,14 @@
                         <option value="Simon - Guide">Simon - Guide</option>
                         <option value="Alexandre - Guide">Alexandre - Guide</option>
                     </select>
+                </div>
+
+                <div class="form-group hidden" id="pinGroup">
+                    <label for="pinCode">🔒 Code PIN (4 chiffres)</label>
+                    <input type="password" id="pinCode" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="••••" autocomplete="off">
+                    <div id="pinError" class="status error" style="margin-top: 10px; display: none;">
+                        ❌ Code PIN incorrect
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -420,8 +434,9 @@
 
                 <div class="info-box">
                     <strong>ℹ️ Info:</strong><br>
-                    Sélectionne ton nom et l'activité que tu vas guider.<br>
-                    L'équipement disponible s'affichera automatiquement.
+                    Sélectionne ton nom et entre ton code PIN de sécurité.<br>
+                    L'équipement disponible s'affichera automatiquement.<br>
+                    <strong>🔒 Le PIN protège contre les usages non autorisés.</strong>
                 </div>
             </div>
         </div>
@@ -473,6 +488,18 @@
     <script>
         // Configuration
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfTrcXaE9AbTgeTii_fV8rLalPuIK_MT5VByA9v9xqJItJZA8Rqjmiizhh8ZDdSrw4tQ/exec';
+        
+        // Configuration des codes PIN par employé
+        // ⚠️ CHANGE CES PINS! Utilise 4 chiffres uniques pour chaque guide
+        const EMPLOYEE_PINS = {
+            "Hugo - Chef guide": "1234",
+            "Grégoire - Guide": "5678",
+            "Jean-Baptiste - Guide": "9012",
+            "Louis-Alexandre - Guide": "3456",
+            "Raphaël - Directeur opérations": "7890",
+            "Simon - Guide": "2468",
+            "Alexandre - Guide": "1357"
+        };
         
         let selectedEmployee = '';
         let selectedActivity = '';
@@ -653,12 +680,59 @@
             }
         };
 
+        function showPinField() {
+            const employeeName = document.getElementById('employeeName').value;
+            const pinGroup = document.getElementById('pinGroup');
+            const pinCode = document.getElementById('pinCode');
+            const pinError = document.getElementById('pinError');
+            
+            if (employeeName) {
+                pinGroup.classList.remove('hidden');
+                pinCode.value = '';
+                pinError.style.display = 'none';
+                // Auto-focus sur le champ PIN
+                setTimeout(() => pinCode.focus(), 100);
+            } else {
+                pinGroup.classList.add('hidden');
+            }
+        }
+
+        function validatePin() {
+            const employeeName = document.getElementById('employeeName').value;
+            const pinCode = document.getElementById('pinCode').value;
+            const pinError = document.getElementById('pinError');
+            
+            if (!employeeName) {
+                alert('⚠️ Sélectionne ton nom');
+                return false;
+            }
+            
+            if (!pinCode || pinCode.length !== 4) {
+                pinError.textContent = '❌ Entre ton code PIN (4 chiffres)';
+                pinError.style.display = 'block';
+                return false;
+            }
+            
+            const correctPin = EMPLOYEE_PINS[employeeName];
+            
+            if (pinCode !== correctPin) {
+                pinError.textContent = '❌ Code PIN incorrect';
+                pinError.style.display = 'block';
+                document.getElementById('pinCode').value = '';
+                document.getElementById('pinCode').focus();
+                return false;
+            }
+            
+            pinError.style.display = 'none';
+            return true;
+        }
+
         async function goToPage2() {
             selectedEmployee = document.getElementById('employeeName').value;
             selectedActivity = document.getElementById('activity').value;
 
-            if (!selectedEmployee) {
-                alert('⚠️ Sélectionne ton nom');
+            // Validation du PIN
+            if (!validatePin()) {
                 return;
             }
 
