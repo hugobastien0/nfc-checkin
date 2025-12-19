@@ -404,7 +404,7 @@
                         <option value="Raphaël - Directeur opérations">Raphaël - Directeur opérations</option>
                         <option value="Simon - Guide">Simon - Guide</option>
                         <option value="Alexandre - Guide">Alexandre - Guide</option>
-                        <option value="Charlotte - Guide">Charlotte - Guide</option>
+                        <option value="Charlotte - Guide via ferrata">Charlotte - Guide via ferrata</option>
                     </select>
                 </div>
 
@@ -524,13 +524,15 @@
                     { name: "Kit guide glace #1", type: "fixed" },
                     { name: "Kit guide glace #2", type: "fixed" },
                     { name: "Sac simond jaune", type: "fixed" },
-                    { name: "Crampons", type: "quantity", default: 2, label: "Nombre de clients +2" },
-                    { name: "Piolets", type: "quantity", default: 2, label: "Nombre de cordées" },
+                    { name: "Crampons", type: "quantity", default: 6, max: 15, label: "Nombre de crampons (max 15)" },
+                    { name: "3 paires Petzl Nomic", type: "fixed" },
+                    { name: "3 paires Petzl Quark", type: "fixed" },
+                    { name: "2 paires Grivel X-monster", type: "fixed" },
                     { name: "Lunettes sécurité (5 paires)", type: "fixed" },
                     { name: "7 dégaines alpines", type: "fixed" },
                     { name: "Kit ATC guide", type: "fixed" },
                     { name: "Kit ATC clients", type: "fixed" },
-                    { name: "Tote bags", type: "quantity", default: 6, label: "Protection cordes" }
+                    { name: "2 tote bags", type: "fixed" }
                 ],
                 "✨ Expérience client": [
                     { name: "Tente de pêche", type: "fixed" },
@@ -570,9 +572,11 @@
                     { name: "Kit relais W", type: "fixed" },
                     { name: "Kit relais V", type: "fixed" },
                     { name: "Kit guide glace #3", type: "fixed" },
-                    { name: "Tote bags", type: "quantity", default: 3, label: "Protection cordes" },
-                    { name: "6 crampons", type: "fixed" },
-                    { name: "2 paires de piolets", type: "fixed" }
+                    { name: "2 tote bags", type: "fixed" },
+                    { name: "Crampons", type: "quantity", default: 6, max: 15, label: "Nombre de crampons (max 15)" },
+                    { name: "3 paires Petzl Nomic", type: "fixed" },
+                    { name: "3 paires Petzl Quark", type: "fixed" },
+                    { name: "2 paires Grivel X-monster", type: "fixed" }
                 ],
                 "✨ Expérience client": [
                     { name: "Tente de pêche", type: "fixed" },
@@ -616,9 +620,11 @@
                     { name: "Kit relais W", type: "fixed" },
                     { name: "Kit relais V", type: "fixed" },
                     { name: "Kit guide glace #3", type: "fixed" },
-                    { name: "Tote bags", type: "quantity", default: 2, label: "Protection cordes" },
-                    { name: "4 crampons", type: "fixed" },
-                    { name: "2 paires de piolets", type: "fixed" }
+                    { name: "2 tote bags", type: "fixed" },
+                    { name: "Crampons", type: "quantity", default: 4, max: 15, label: "Nombre de crampons (max 15)" },
+                    { name: "3 paires Petzl Nomic", type: "fixed" },
+                    { name: "3 paires Petzl Quark", type: "fixed" },
+                    { name: "2 paires Grivel X-monster", type: "fixed" }
                 ],
                 "✨ Expérience client": [
                     { name: "Tente de pêche", type: "fixed" },
@@ -881,6 +887,9 @@
                         input.id = `qty_${uniqueId}`;
                         input.value = kit.default || 1;
                         input.min = 0;
+                        if (kit.max) {
+                            input.max = kit.max;
+                        }
                         input.onclick = (e) => e.stopPropagation();
                         kitDiv.appendChild(input);
                     }
